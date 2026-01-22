@@ -1,0 +1,83 @@
+﻿@import url("https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600&display=swap");
+
+:root {
+  font-family: "Noto Serif SC", "PingFang SC", "Microsoft YaHei", serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #1b2b28;
+  background-color: #f4f7f6;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --brand-900: #0f3a36;
+  --brand-700: #0f5a54;
+  --brand-500: #1c7c76;
+  --brand-200: #d7f2ef;
+  --accent-500: #f4b642;
+  --surface: #ffffff;
+  --surface-muted: #f0f4f3;
+  --text-muted: #61706c;
+  --shadow-soft: 0 12px 28px rgba(15, 58, 54, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, #e8f6f4 0%, #f8f9f7 45%, #eef3f2 100%);
+}
+
+#app {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand-title {
+  font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
+  font-size: 26px;
+  letter-spacing: 1px;
+}
+
+.page-card {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: var(--shadow-soft);
+}
+
+.el-menu-item {
+  margin: 14px 0;
+  border-radius: 12px;
+  height: 48px;
+  line-height: 48px;
+  padding: 0 16px;
+}
+
+.el-menu-item:hover {
+  background: rgba(28, 124, 118, 0.16) !important;
+}
+
+.el-menu-item.is-active {
+  background: rgba(244, 182, 66, 0.2) !important;
+}
+
+.el-table th {
+  background: #f1f6f5;
+  color: #385a55;
+}
+
+.el-table td, .el-table th {
+  padding: 12px 0;
+}
+
+.muted {
+  color: var(--text-muted);
+}
