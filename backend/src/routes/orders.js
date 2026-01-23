@@ -81,12 +81,17 @@ router.get("/", auth, async (req, res) => {
       params
     );
     const total = countRows[0]?.total || 0;
+    const [sumRows] = await conn.query(
+      `SELECT SUM(total_amount) as sumAmount FROM orders ${whereClause}`,
+      params
+    );
+    const sumAmount = Number(sumRows[0]?.sumAmount || 0);
     const [orders] = await conn.query(
       `SELECT id, order_number, table_label, ordered_at, total_amount, note, source FROM orders ${whereClause} ORDER BY ordered_at DESC LIMIT ? OFFSET ?`,
       [...params, limit, offset]
     );
     if (orders.length === 0) {
-      return res.json({ data: [], total });
+      return res.json({ data: [], total, sumAmount });
     }
     const orderIds = orders.map((order) => order.id);
     const [items] = await conn.query(
@@ -104,7 +109,7 @@ router.get("/", auth, async (req, res) => {
       ...order,
       items: itemsByOrder[order.id] || [],
     }));
-    return res.json({ data: result, total });
+    return res.json({ data: result, total, sumAmount });
   } catch (error) {
     return res.status(500).json({ message: "Failed to load orders" });
   } finally {

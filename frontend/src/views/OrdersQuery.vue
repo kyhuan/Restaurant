@@ -2,6 +2,12 @@
   <div class="page-card orders-card">
     <div class="page-header">
       <div class="section-title">营业收入汇总</div>
+      <div class="range-summary">
+        <span class="muted">查询时间段：</span>
+        <span class="range-text">{{ rangeText }}</span>
+        <span class="muted">合计金额：</span>
+        <span class="total">¥ {{ sumAmount.toFixed(2) }}</span>
+      </div>
     </div>
     <div class="filters">
       <el-date-picker
@@ -39,7 +45,7 @@
       </el-table-column>
       <el-table-column prop="order_number" label="订单号" width="200" />
       <el-table-column prop="table_label" label="桌台" width="100" />
-      <el-table-column prop="ordered_at" label="下单时间" width="180" />
+      <el-table-column prop="ordered_date" label="订单时间" width="140" />
       <el-table-column prop="total_amount" label="订单金额" width="120" />
       <el-table-column prop="note" label="备注" min-width="160" show-overflow-tooltip />
     </el-table>
@@ -75,8 +81,17 @@ const filters = reactive({
 });
 const pagination = reactive({
   page: 1,
-  pageSize: 20,
+  pageSize: 8,
   total: 0,
+});
+
+const sumAmount = ref(0);
+
+const rangeText = computed(() => {
+  if (filters.dateRange?.length === 2) {
+    return `${filters.dateRange[0]} 至 ${filters.dateRange[1]}`;
+  }
+  return "全部";
 });
 
 const totalAmount = computed(() =>
@@ -99,11 +114,12 @@ const loadOrders = async () => {
     const { data } = await client.get("/orders", { params });
     orders.value = data.data.map((item) => ({
       ...item,
-      ordered_at: item.ordered_at
-        ? new Date(item.ordered_at).toLocaleString("zh-CN")
+      ordered_date: item.ordered_at
+        ? new Date(item.ordered_at).toLocaleDateString("zh-CN")
         : "",
     }));
     pagination.total = data.total;
+    sumAmount.value = Number(data.sumAmount || 0);
   } catch (error) {
     ElMessage.error(error.response?.data?.message || "加载失败");
   }
@@ -144,6 +160,21 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: var(--brand-700);
+}
+
+.range-summary {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: rgba(28, 124, 118, 0.08);
+  padding: 6px 14px;
+  border-radius: 12px;
+}
+
+.range-text {
+  font-weight: 600;
+  color: var(--brand-900);
+  margin-right: 8px;
 }
 
 .table-footer {
