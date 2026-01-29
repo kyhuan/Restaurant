@@ -1,8 +1,8 @@
-<template>
+﻿<template>
   <div class="page-card">
     <div class="header">
       <div class="section-title">系统设置</div>
-      <div class="muted">订单导入模板字段：订单日期、订单编号、菜品、单位、数量、单价、金额、订单备注（可为空）</div>
+      <div class="muted">订单导入模板字段：订单日期、订单编号、桌台号、菜品、单位、数量、单价、金额、订单备注（可为空）</div>
     </div>
 
     <el-upload

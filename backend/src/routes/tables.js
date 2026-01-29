@@ -41,4 +41,48 @@ router.post("/batch", auth, async (req, res) => {
   }
 });
 
+router.put("/:id", auth, async (req, res) => {
+  const storeId = req.user.storeId;
+  const { id } = req.params;
+  const { label } = req.body || {};
+  if (!label || !String(label).trim()) {
+    return res.status(400).json({ message: "桌台号不能为空" });
+  }
+  const conn = await pool.getConnection();
+  try {
+    const [result] = await conn.query(
+      "UPDATE dining_tables SET label = ? WHERE id = ? AND store_id = ?",
+      [String(label).trim(), id, storeId]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "桌台不存在" });
+    }
+    return res.json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ message: "更新失败" });
+  } finally {
+    conn.release();
+  }
+});
+
+router.delete("/:id", auth, async (req, res) => {
+  const storeId = req.user.storeId;
+  const { id } = req.params;
+  const conn = await pool.getConnection();
+  try {
+    const [result] = await conn.query(
+      "DELETE FROM dining_tables WHERE id = ? AND store_id = ?",
+      [id, storeId]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "桌台不存在" });
+    }
+    return res.json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ message: "删除失败" });
+  } finally {
+    conn.release();
+  }
+});
+
 module.exports = router;

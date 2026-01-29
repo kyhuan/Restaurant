@@ -69,6 +69,14 @@ a {
   background: rgba(244, 182, 66, 0.2) !important;
 }
 
+.el-table {
+  font-family: inherit;
+}
+
+.el-table * {
+  font-family: inherit;
+}
+
 .el-table th {
   background: #f1f6f5;
   color: #385a55;

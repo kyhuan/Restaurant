@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const multer = require("multer");
 const xlsx = require("xlsx");
 const pool = require("../db");
@@ -8,14 +8,15 @@ const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const HEADER_MAP = {
-  订单日期: "orderDate",
-  订单编号: "orderNumber",
-  菜品: "dishName",
-  单位: "unit",
-  数量: "quantity",
-  单价: "price",
-  金额: "amount",
-  订单备注: "note",
+  "订单日期": "orderDate",
+  "订单编号": "orderNumber",
+  "桌台号": "tableLabel",
+  "菜品": "dishName",
+  "单位": "unit",
+  "数量": "quantity",
+  "单价": "price",
+  "金额": "amount",
+  "订单备注": "note",
 };
 
 function parseExcelDate(value) {
@@ -43,18 +44,18 @@ function parseExcelDate(value) {
 router.post("/orders", auth, upload.single("file"), async (req, res) => {
   const storeId = req.user.storeId;
   if (!req.file) {
-    return res.status(400).json({ message: "Missing file" });
+    return res.status(400).json({ message: "缺少文件" });
   }
   const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = xlsx.utils.sheet_to_json(sheet, { header: 1, raw: true });
   if (rows.length < 2) {
-    return res.status(400).json({ message: "Empty sheet" });
+    return res.status(400).json({ message: "表格为空" });
   }
   const headers = rows[0].map((value) => String(value || "").trim());
   const columns = headers.map((header) => HEADER_MAP[header]);
   if (columns.some((value) => !value)) {
-    return res.status(400).json({ message: "Invalid headers" });
+    return res.status(400).json({ message: "模板表头不正确" });
   }
 
   const orderMap = new Map();
@@ -76,6 +77,7 @@ router.post("/orders", auth, upload.single("file"), async (req, res) => {
       continue;
     }
     const orderDate = parseExcelDate(record.orderDate);
+    const tableLabel = record.tableLabel ? String(record.tableLabel).trim() : "";
     const quantity = Number(record.quantity) || 0;
     const price = Number(record.price) || 0;
     const amount = record.amount !== undefined && record.amount !== null && record.amount !== ""
@@ -88,6 +90,7 @@ router.post("/orders", auth, upload.single("file"), async (req, res) => {
         orderNumber,
         orderDate,
         note,
+        tableLabel,
         items: [],
       });
     }
@@ -97,6 +100,9 @@ router.post("/orders", auth, upload.single("file"), async (req, res) => {
     }
     if (!order.note && note) {
       order.note = note;
+    }
+    if (!order.tableLabel && tableLabel) {
+      order.tableLabel = tableLabel;
     }
     order.items.push({
       dishName,
@@ -132,7 +138,7 @@ router.post("/orders", auth, upload.single("file"), async (req, res) => {
         [
           storeId,
           order.orderNumber,
-          "导入",
+          order.tableLabel || "导入",
           order.orderDate || new Date(),
           totalAmount,
           order.note || null,
@@ -165,7 +171,7 @@ router.post("/orders", auth, upload.single("file"), async (req, res) => {
       errors,
     });
   } catch (error) {
-    return res.status(500).json({ message: "Import failed" });
+    return res.status(500).json({ message: "导入失败" });
   } finally {
     conn.release();
   }
