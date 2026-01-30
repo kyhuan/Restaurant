@@ -117,4 +117,30 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
+router.delete("/by-number/:orderNumber", auth, async (req, res) => {
+  const storeId = req.user.storeId;
+  const { orderNumber } = req.params;
+  if (!orderNumber || !String(orderNumber).trim()) {
+    return res.status(400).json({ message: "订单号不能为空" });
+  }
+  const conn = await pool.getConnection();
+  try {
+    const [orders] = await conn.query(
+      "SELECT id FROM orders WHERE store_id = ? AND order_number = ?",
+      [storeId, String(orderNumber).trim()]
+    );
+    if (orders.length === 0) {
+      return res.status(404).json({ message: "订单不存在" });
+    }
+    const orderId = orders[0].id;
+    await conn.query("DELETE FROM order_items WHERE order_id = ?", [orderId]);
+    await conn.query("DELETE FROM orders WHERE id = ? AND store_id = ?", [orderId, storeId]);
+    return res.json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ message: "删除失败" });
+  } finally {
+    conn.release();
+  }
+});
+
 module.exports = router;
